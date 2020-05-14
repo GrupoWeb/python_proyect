@@ -5,17 +5,13 @@ from difflib import SequenceMatcher as SM
 import random
 import time
 
-
-
-# importlib.reload(sys)
-# sys.setdefaultencoding('utf-8')
-# importlit.reload(sys)
-
-
 ### Variables de entorno
-
 request_data = ""
 x = 1
+response_error = 'No se puede entender lo que dices'
+description_get = 'no tengo esa información por el momento, me podrias decir de nuevo la informacion para que lo recuerde?'
+description_end = 'ok, muchas gracias, hasta luego!'
+description_save = 'ya almacene el dato en mi memoria, puedes repetirme la pregunta por favor!'
 
 
 
@@ -30,9 +26,8 @@ eng.say("Hola, soy Maritza. ¿En qué puedo ayudarte?")
 eng.runAndWait()
 
 
-## Error data
 
-response_error = 'No se puede entender lo que dices'
+
 
 def recognizeMicAudio():
       request_data = ""
@@ -51,53 +46,56 @@ def recognizeMicAudio():
 
 conexion = mysql.connector.connect(host="127.0.0.1", user="root", passwd="12345678", database="asistente")
 cursor = conexion.cursor(buffered=True)
+      
+def __setData(key,descripction):
+      query = "INSERT INTO diccionario_datos(key_data,descripcion) VALUES(%s,%s)"
+      cursor.execute(query,(str(key), str(descripction)))
+      conexion.commit()
+      
+      return True
+
+def __getData(busqueda):
+
+      cursor.execute("SELECT * FROM diccionario_datos WHERE key_data = '"+busqueda+"'")
+      records = cursor.fetchall()
+      rows_affected=cursor.rowcount
+      if rows_affected == 1:
+            return records
+      else:
+            return 0
+      
+      
 
 
-while request_data != "silencio":
+while True:
       request_data = recognizeMicAudio()
-      cursor.execute("SELECT * FROM diccionario_datos")
-      nDatos = cursor.rowcount
-      print(request_data)
-      print(nDatos)
       
-
-      for fila in cursor:
-            id_data = fila[0]
-            key_data = fila[1]
-            description_data = fila[2]
-            comparacion = SM(None,key_data,request_data).ratio()
-            
-            if comparacion > 0.7:
-                  eng.say(description_data)
+      if request_data != 'silencio':
+            data = __getData(request_data)
+            if data != 0:
+                  for fila in data:
+                        id_data = fila[0]
+                        key_data = fila[1]
+                        description_data = fila[2]
+                        comparacion = SM(None,key_data,request_data).ratio()
+                        print(request_data)
+                        print(comparacion)
+                        if comparacion > 0.7:
+                              eng.say(description_data)
+                              eng.runAndWait()
+                        else:
+                              eng.say(description_get)
+                              eng.runAndWait()
+                              request_description = recognizeMicAudio()
+                              __setData(request_data,request_description)
+            else:
+                  eng.say(description_get)
                   eng.runAndWait()
-
-
-
-      
-
-      # if palabra == "En qué clase estamos":
-      #       eng.say("estamos en la clase del ingeniero kalki")
-      #       eng.runAndWait()
-      # if palabra == "que dia es hoy":
-      #       eng.say("hoy es sabado")
-      #       eng.runAndWait()
-      # if palabra == "adiós":
-      #       eng.say("hasta pronto")
-      #       eng.runAndWait()
-      #       break
-      # if  palabra == 'fechas':
-      #       # temperatura = dame_Temperatura()
-      #       fecha = dimeFecha()
-      #       eng.say(fecha)
-      #       eng.runAndWait()
-      # if  palabra == 'fecha':
-      #       # temperatura = dame_Temperatura()
-      #       fecha = dimeFecha()
-      #       eng.say(fecha)
-      #       # eng.say(temperatura)
-      #       eng.runAndWait()
-      # # eng.say(palabra)
-      # # eng.runAndWait()
-
-
-# print(recognizeMicAudio())
+                  request_description = recognizeMicAudio()
+                  __setData(request_data,request_description)
+                  eng.say(description_save)
+                  eng.runAndWait()
+      else:
+            eng.say(description_end)
+            eng.runAndWait()
+            break
