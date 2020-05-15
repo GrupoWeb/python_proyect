@@ -2,12 +2,10 @@ import pyttsx3
 import speech_recognition as sr
 import mysql.connector
 from difflib import SequenceMatcher as SM
-import random
-import time
+
 
 ### Variables de entorno
 request_data = ""
-x = 1
 response_error = 'No se puede entender lo que dices'
 description_get = 'no tengo esa información por el momento, me podrias decir de nuevo la informacion para que lo recuerde?'
 description_end = 'ok, muchas gracias, hasta luego!'
@@ -24,9 +22,6 @@ listVoices = eng.getProperty("voices")
 eng.setProperty("voice",listVoices[0].id)
 eng.say("Hola, soy Maritza. ¿En qué puedo ayudarte?")
 eng.runAndWait()
-
-
-
 
 
 def recognizeMicAudio():

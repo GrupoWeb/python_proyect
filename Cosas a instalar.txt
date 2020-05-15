@@ -1,0 +1,9 @@
+-Instalar sublime text 3 + sublimeREPL
+-Instalar python 3.7.4
+Paquetes a instalar
+-pip https://bootstrap.pypa.io/get-pip.py
+-pyttsx3
+-SpeechRecognition
+-mysql-connector
+-PyAudio https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio
+-Instalar Xampp
